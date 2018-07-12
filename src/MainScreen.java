@@ -39,6 +39,7 @@ public class MainScreen implements Initializable {
     @FXML TextField txtPhysPercentPen;
     @FXML TextField txtMagFlatPen;
     @FXML TextField txtMagPercentPen;
+    @FXML TextField txtDR;
     @FXML Label lblPhysHealth;
     @FXML Label lblMagHealth;
     @FXML Label lblPhysHealthPen;
@@ -83,6 +84,7 @@ public class MainScreen implements Initializable {
         int health;
         int physDef;
         int magDef;
+        double damageMitigation;
 
         if(txtHealth.getText().equals(""))health = 0;
         else health = Integer.valueOf(txtHealth.getText());
@@ -93,9 +95,15 @@ public class MainScreen implements Initializable {
         if(txtMagDef.getText().equals(""))magDef = 0;
         else magDef = Integer.valueOf(txtMagDef.getText());
 
-        double physMult = (100.0/(physDef + 100));
+        if(txtDR.getText().equals(""))damageMitigation = 0;
+        else damageMitigation = Double.valueOf(txtDR.getText()) / 100;
+
+        double basePhysMult = (100.0/(physDef + 100));
+        double physMult = basePhysMult - (basePhysMult * damageMitigation);
         int physMit = rounder.toWhole(100 * (1-physMult));
-        double magMult = (100.0/(magDef + 100));
+
+        double baseMagMult = (100.0/(magDef + 100));
+        double magMult = baseMagMult - (baseMagMult * damageMitigation);
         int magMit = rounder.toWhole(100 * (1-magMult));
 
         int basePhysHealth = rounder.toWhole(health / physMult);
@@ -115,6 +123,7 @@ public class MainScreen implements Initializable {
         double physPercentPen;
         int magFlatPen;
         double magPercentPen;
+        double damageMitigation;
 
         if(txtHealth.getText().equals(""))health = 0;
         else health = Integer.valueOf(txtHealth.getText());
@@ -124,6 +133,9 @@ public class MainScreen implements Initializable {
 
         if(txtMagDef.getText().equals(""))magDef = 0;
         else magDef = Integer.valueOf(txtMagDef.getText());
+
+        if(txtDR.getText().equals(""))damageMitigation = 0;
+        else damageMitigation = Double.valueOf(txtDR.getText()) / 100;
 
         if(txtPhysFlatPen.getText().equals(""))physFlatPen = 0;
         else physFlatPen = Integer.valueOf(txtPhysFlatPen.getText());
@@ -147,9 +159,12 @@ public class MainScreen implements Initializable {
         magDef -= magFlatPen;
         if(magDef < 0) magDef = 0;
 
-        double physMult = (100.0/(physDef + 100));
+        double basePhysMult = (100.0/(physDef + 100));
+        double physMult = basePhysMult - (basePhysMult * damageMitigation);
         int physMit = rounder.toWhole(100 * (1-physMult));
-        double magMult = (100.0/(magDef + 100));
+
+        double baseMagMult = (100.0/(magDef + 100));
+        double magMult = baseMagMult - (baseMagMult * damageMitigation);
         int magMit = rounder.toWhole(100 * (1-magMult));
 
         int penPhysHealth = rounder.toWhole(health / physMult);
@@ -230,6 +245,7 @@ public class MainScreen implements Initializable {
         txtPhysFlatPen.setText("0");
         txtPhysPercentPen.setText("0");
         txtMagFlatPen.setText("0");
+        txtDR.setText("0");
         txtMagPercentPen.setText("0");
         lblPhysHealth.setText("0 (0% mit)");
         lblMagHealth.setText("0 (0% mit)");
@@ -414,6 +430,32 @@ public class MainScreen implements Initializable {
                 if (!newPropertyValue)
                 {
                     if(txtMagPercentPen.getText().equals("")) txtMagPercentPen.setText("0");
+                }
+            }
+        });
+
+        txtDR.textProperty().addListener(new ChangeListener<String>() {
+            @Override
+            public void changed(ObservableValue<? extends String> observable, String oldValue,
+                                String newValue) {
+                if (!newValue.matches("\\d*")) {
+                    txtDR.setText(newValue.replaceAll("[^\\d]", ""));
+                }
+                else if(newValue.equals("")) return;
+                else if(Integer.valueOf(newValue) > 99){
+                    txtDR.setText(oldValue);
+                }
+                else{
+                    updateBaseHealth();
+                }
+            }
+        });
+        txtDR.focusedProperty().addListener(new ChangeListener<Boolean>() {
+            @Override
+            public void changed(ObservableValue<? extends Boolean> arg0, Boolean oldPropertyValue, Boolean newPropertyValue) {
+                if (!newPropertyValue)
+                {
+                    if(txtDR.getText().equals("")) txtDR.setText("0");
                 }
             }
         });
